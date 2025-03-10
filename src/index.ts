@@ -13,7 +13,7 @@ app.use("/components", componentsRouter);
 app.use("/user", userRouter);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Hello World! from vercel");
 });
 
-export { app };
+export default app;
