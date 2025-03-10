@@ -12,4 +12,8 @@ app.use(express.json());
 app.use("/components", componentsRouter);
 app.use("/user", userRouter);
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 export { app };
