@@ -2,9 +2,9 @@
   "name": "backends",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "bin.ts",
   "scripts": {
-    "dev": "tsc -b && node dist/index.js"
+    "dev": "tsc -b && node dist/bin.js"
   },
   "keywords": [],
   "author": "",

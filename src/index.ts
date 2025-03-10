@@ -9,9 +9,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use('/components',componentsRouter);
-app.use('/user',userRouter);
+app.use("/components", componentsRouter);
+app.use("/user", userRouter);
 
-app.listen(PORT, () => {
-  console.log(`✅ Server is running on port ${PORT}`);
-});
+export { app };
