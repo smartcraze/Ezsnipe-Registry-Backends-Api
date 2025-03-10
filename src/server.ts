@@ -1,5 +1,6 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
 import { app } from ".";
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  return app(req, res); 
+import { Request, Response } from "express";
+
+export default function handler(req: Request, res: Response) {
+  app(req, res);
 }
