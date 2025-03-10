@@ -16,7 +16,7 @@ export const authenticateUser = (
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
       userId: string;
     };
-    // @ts-ignore
+    
     req.userId = decoded.userId;
     next();
   } catch (error) {

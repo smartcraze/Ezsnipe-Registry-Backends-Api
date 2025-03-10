@@ -2,7 +2,6 @@ import { Router } from "express";
 import { prisma } from "./db";
 import multer from "multer";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import crypto from "crypto";
 import { authenticateUser } from "./middleware";
 export const componentsRouter = Router();
 
@@ -35,8 +34,12 @@ componentsRouter.post(
       }
 
       let component = await prisma.component.findUnique({ where: { name } });
-      // @ts-ignore
+
       const authorId = req.userId;
+
+      if (!authorId) {
+        throw new Error("User ID is missing");
+      }
 
       if (!component) {
         component = await prisma.component.create({
@@ -90,10 +93,8 @@ componentsRouter.post(
 
 componentsRouter.get("/list", authenticateUser, async (req, res) => {
   try {
-    // @ts-ignore
     const userId = req.userId;
 
-    // Fetch components uploaded by the authenticated user
     const components = await prisma.component.findMany({
       where: { authorId: userId },
       include: {
@@ -105,12 +106,73 @@ componentsRouter.get("/list", authenticateUser, async (req, res) => {
       },
     });
 
-    res.status(200).json({ components });
+    const formattedResponse = {
+      components: components.map((component) => ({
+        name: component.name,
+        versions: Object.fromEntries(
+          component.versions.map((v) => [v.version, v.files.map((f) => f.url)])
+        ),
+      })),
+    };
+
+    res.status(200).json(formattedResponse);
   } catch (error) {
     console.error("Error fetching components:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-componentsRouter.get("/:name", async (req, res) => {});
-componentsRouter.get("/:name/:version", async (req, res) => {});
+componentsRouter.get("/:name", async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    const component = await prisma.component.findUnique({
+      where: { name },
+      include: {
+        versions: {
+          include: {
+            files: true,
+          },
+        },
+      },
+    });
+
+    if (!component) {
+      res.status(404).json({ message: "Component not found" });
+      return;
+    }
+
+    res.status(200).json({ component });
+  } catch (error) {
+    console.error("Error fetching component:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+componentsRouter.get("/:name/:version", async (req, res) => {
+  try {
+    const { name, version } = req.params;
+
+    const component = await prisma.component.findUnique({
+      where: { name },
+      include: {
+        versions: {
+          where: { version },
+          include: {
+            files: true,
+          },
+        },
+      },
+    });
+
+    if (!component) {
+      res.status(404).json({ message: "Component not found" });
+      return;
+    }
+
+    res.status(200).json({ component });
+  } catch (error) {
+    console.error("Error fetching component:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
