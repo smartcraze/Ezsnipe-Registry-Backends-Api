@@ -16,4 +16,5 @@ app.get("/", (req, res) => {
   res.send("Hello World! from vercel");
 });
 
-export default app;
+app.listen(3000,()=>{console.log("server is running on 3000")});
+// export default app;
